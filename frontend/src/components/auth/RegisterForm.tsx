@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -55,18 +56,45 @@ const RegisterForm = () => {
     },
   });
 
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmit = async (values: FormValues) => {
     clearError();
+    setIsSubmitting(true);
 
-    const success = await register(
-      values.name,
-      values.email,
-      values.password
-    );
+    try {
+      const success = await register(
+        values.name,
+        values.email,
+        values.password
+      );
 
-    if (success) {
-      // Redirect to login page after successful registration
-      navigate("/login");
+      if (success) {
+        // Show success toast
+        toast({
+          title: "Registration successful!",
+          description: "Welcome to ChatEmbed. Redirecting to dashboard...",
+          variant: "default",
+        });
+
+        // Short delay for toast to be visible
+        setTimeout(() => {
+          // Redirect to dashboard after successful registration and auto-login
+          // Regular users go to /dashboard, not /admin/dashboard
+          navigate("/dashboard", { replace: true });
+        }, 1500);
+      }
+    } catch (error) {
+      // Error is handled in the auth context
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -228,8 +256,8 @@ const RegisterForm = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full button-primary-theme" disabled={isLoading}>
-                    {isLoading ? "Creating Account..." : "Register"}
+                  <Button type="submit" className="w-full button-primary-theme" disabled={isLoading || isSubmitting}>
+                    {isLoading || isSubmitting ? "Creating Account..." : "Register"}
                   </Button>
                 </form>
               </Form>
@@ -237,7 +265,7 @@ const RegisterForm = () => {
             <CardFooter className="flex flex-col space-y-2 text-center">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link to="/login" className="text-primary hover:underline">
+                <Link to="/auth/login" className="text-primary hover:underline">
                   Login
                 </Link>
               </p>

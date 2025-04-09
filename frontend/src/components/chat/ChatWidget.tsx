@@ -4,6 +4,7 @@ import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import TypingIndicator from "./TypingIndicator";
+import GuestRegistration from "./GuestRegistration";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
   WebSocketMessage,
   FollowUpQuestion,
   AnswerOption,
+  GuestUser,
 } from "@/types/chat";
 import websocketService from "@/services/websocketService";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,9 @@ interface ChatWidgetProps {
   contextMode?: "restricted" | "general";
   contextName?: string;
   onSendMessage?: (message: string) => Promise<void>;
+  requireRegistration?: boolean;
+  guestUser?: GuestUser | null;
+  onGuestRegister?: (data: { fullName: string; email: string; phone: string }) => Promise<void>;
 }
 
 const ChatWidget = ({
@@ -45,15 +50,23 @@ const ChatWidget = ({
   contextMode = "general",
   contextName = "",
   onSendMessage = async () => {},
+  requireRegistration = true,
+  guestUser = null,
+  onGuestRegister = async () => {},
 }: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [isRegistered, setIsRegistered] = useState(!requireRegistration || !!guestUser);
   const constraintsRef = useRef(null);
 
   // Initialize WebSocket connection and welcome message
   useEffect(() => {
+    // Don't connect if registration is required and user is not registered
+    if (requireRegistration && !isRegistered) return;
+
     // Connect to WebSocket
     if (!websocketService.isConnected()) {
       websocketService.connect();
@@ -92,7 +105,7 @@ const ChatWidget = ({
       // Request chat history when connected
       websocketService.sendMessage({
         type: "history_request",
-        payload: {},
+        payload: { guestId: guestUser?.id },
         timestamp: new Date().toISOString(),
       });
     });
@@ -101,7 +114,7 @@ const ChatWidget = ({
     const initialMessages: Message[] = [
       {
         id: "1",
-        content: `Hello! I'm your AI assistant${contextMode === "restricted" ? ` for ${contextName}` : ""}. How can I help you today?`,
+        content: `Hello${guestUser ? ` ${guestUser.fullName}` : ""}! I'm your AI assistant${contextMode === "restricted" ? ` for ${contextName}` : ""}. How can I help you today?`,
         sender: "assistant",
         timestamp: new Date(),
         status: "sent",
@@ -114,7 +127,7 @@ const ChatWidget = ({
       unsubscribe();
       connectionHandler();
     };
-  }, [contextMode, contextName]);
+  }, [contextMode, contextName, isRegistered, guestUser]);
 
   const handleAnswerOptionClick = (
     question: FollowUpQuestion,
@@ -180,6 +193,7 @@ const ChatWidget = ({
           content,
           contextMode,
           contextName,
+          guestId: guestUser?.id, // Include guest user ID if available
         },
         timestamp: new Date().toISOString(),
       });
@@ -224,6 +238,22 @@ const ChatWidget = ({
           msg.id === messageId ? { ...msg, status: "error" } : msg,
         ),
       );
+    }
+  };
+
+  // Handle guest registration
+  const handleGuestRegister = async (data: { fullName: string; email: string; phone: string }) => {
+    setIsLoading(true);
+    setRegistrationError(null);
+
+    try {
+      await onGuestRegister(data);
+      setIsRegistered(true);
+    } catch (error) {
+      console.error("Guest registration error:", error);
+      setRegistrationError("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -275,23 +305,35 @@ const ChatWidget = ({
               onMinimize={() => setIsOpen(false)}
             />
 
-            <div className="flex-1 flex flex-col">
-              <ChatMessages
-                messages={messages}
-                isLoading={isLoading}
-                className="flex-1"
-                onAnswerOptionClick={handleAnswerOptionClick}
-              />
-              <TypingIndicator isTyping={isAssistantTyping} className="ml-12" />
-            </div>
+            {!isRegistered ? (
+              <div className="flex-1 flex flex-col">
+                <GuestRegistration
+                  onRegister={handleGuestRegister}
+                  isLoading={isLoading}
+                  error={registrationError}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 flex flex-col">
+                  <ChatMessages
+                    messages={messages}
+                    isLoading={isLoading}
+                    className="flex-1"
+                    onAnswerOptionClick={handleAnswerOptionClick}
+                  />
+                  <TypingIndicator isTyping={isAssistantTyping} className="ml-12" />
+                </div>
 
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              disabled={isLoading}
-              allowAttachments={allowAttachments}
-              allowVoice={allowVoice}
-              allowEmoji={allowEmoji}
-            />
+                <ChatInput
+                  onSendMessage={handleSendMessage}
+                  disabled={isLoading}
+                  allowAttachments={allowAttachments}
+                  allowVoice={allowVoice}
+                  allowEmoji={allowEmoji}
+                />
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.div

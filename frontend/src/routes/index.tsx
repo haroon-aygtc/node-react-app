@@ -22,17 +22,33 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/signup" element={<Navigate to="/register" replace />} />
+      {/* Auth Routes */}
+      <Route path="/auth/login" element={<LoginPage />} />
+      <Route path="/auth/register" element={<RegisterPage />} />
+      <Route path="/auth/signup" element={<Navigate to="/auth/register" replace />} />
 
-      {/* Admin Dashboard */}
+      {/* Legacy Routes - Redirect to new auth paths */}
+      <Route path="/login" element={<Navigate to="/auth/login" replace />} />
+      <Route path="/register" element={<Navigate to="/auth/register" replace />} />
+      <Route path="/signup" element={<Navigate to="/auth/register" replace />} />
+
+      {/* Admin Dashboard - Protected for admin users */}
       <Route
         path="/admin/dashboard"
         element={
           <AdminRoute>
             <Dashboard />
           </AdminRoute>
+        }
+      />
+
+      {/* User Dashboard - Protected for all authenticated users */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         }
       />
 

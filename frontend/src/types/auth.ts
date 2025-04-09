@@ -2,7 +2,12 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "user";
+  role: string;
+  userType?: string;
+  phone?: string;
+  profileImage?: string;
+  createdAt?: string;
+  lastLogin?: string;
   avatar?: string;
 }
 
@@ -31,7 +36,6 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-  message: string;
   user: User;
   token: string;
 }

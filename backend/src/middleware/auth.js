@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../utils/mockDb');
+const User = require('../models/User');
 const config = require('../config/config');
 const { error } = require('../utils/responseHandler');
 

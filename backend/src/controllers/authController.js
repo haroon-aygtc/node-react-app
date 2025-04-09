@@ -1,5 +1,5 @@
-// Use mock database for testing
-const { User } = require('../utils/mockDb');
+// Use MySQL User model
+const User = require('../models/User');
 const { validationResult } = require('express-validator');
 const { success, error, validationError } = require('../utils/responseHandler');
 
@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     // Check if user already exists
-    let user = await User.findOne({ email });
+    let user = await User.findByEmail(email);
     if (user) {
       return error(res, 'User already exists', 400);
     }
@@ -31,21 +31,25 @@ exports.register = async (req, res) => {
     });
 
     // Generate token
-    const token = user.getSignedJwtToken();
+    const token = User.getSignedJwtToken(user);
 
     // Return response
     return success(
-      res, 
-      'User registered successfully', 
+      res,
+      'User registered successfully',
       {
         user: {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          userType: user.user_type,
+          phone: user.phone,
+          profileImage: user.profile_image,
+          createdAt: user.created_at
         },
         token
-      }, 
+      },
       201
     );
   } catch (err) {
@@ -68,33 +72,40 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findByEmail(email);
 
-    // In a real app, we would use .select('+password') to include the password
-    // but our mock DB handles this differently
+    // Check if user exists
     if (!user) {
       return error(res, 'Invalid credentials', 401);
     }
 
     // Check if password matches
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await User.matchPassword(password, user.password);
     if (!isMatch) {
       return error(res, 'Invalid credentials', 401);
     }
 
+    // Update last login time
+    await User.updateLastLogin(user.id);
+
     // Generate token
-    const token = user.getSignedJwtToken();
+    const token = User.getSignedJwtToken(user);
 
     // Return response
     return success(
-      res, 
-      'Login successful', 
+      res,
+      'Login successful',
       {
         user: {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          userType: user.user_type,
+          phone: user.phone,
+          profileImage: user.profile_image,
+          lastLogin: user.last_login,
+          createdAt: user.created_at
         },
         token
       }
@@ -113,14 +124,20 @@ exports.getMe = async (req, res) => {
     const user = await User.findById(req.user.id);
 
     return success(
-      res, 
-      'User retrieved successfully', 
+      res,
+      'User retrieved successfully',
       {
         user: {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          userType: user.user_type,
+          phone: user.phone,
+          profileImage: user.profile_image,
+          lastLogin: user.last_login,
+          createdAt: user.created_at,
+          isActive: user.is_active
         }
       }
     );

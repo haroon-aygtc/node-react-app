@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Menu, X, MessageSquare } from "lucide-react";
+import { Menu, X, MessageSquare, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/context/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-interface HeaderProps {
-  isLoggedIn?: boolean;
-  userName?: string;
-}
+interface HeaderProps {}
 
-const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
+const Header = ({}: HeaderProps) => {
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -62,11 +62,11 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
         {/* Auth Buttons - Desktop */}
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2">
-                  <span>{userName}</span>
+                  <span>{user?.name || 'User'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -77,17 +77,17 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
                   <Link to="/account">Account Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/logout">Logout</Link>
+                  <button type="button" onClick={() => { logout(); navigate('/'); }}>Logout</button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/login">Login</Link>
+                <Link to="/auth/login">Login</Link>
               </Button>
               <Button asChild>
-                <Link to="/signup">Sign Up</Link>
+                <Link to="/auth/register">Sign Up</Link>
               </Button>
             </>
           )}
@@ -95,6 +95,7 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
 
         {/* Mobile Menu Button */}
         <button
+          type="button"
           className="md:hidden p-2 rounded-md hover:bg-accent"
           onClick={toggleMobileMenu}
           aria-label="Toggle menu"
@@ -141,7 +142,7 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
             </Link>
 
             <div className="pt-4 border-t border-border/40">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <div className="flex flex-col space-y-3">
                   <Link
                     to="/admin/dashboard"
@@ -158,9 +159,9 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
                     Account Settings
                   </Link>
                   <Link
-                    to="/logout"
+                    to="#"
                     className="text-sm font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => { setIsMobileMenuOpen(false); logout(); navigate('/'); }}
                   >
                     Logout
                   </Link>
@@ -169,7 +170,7 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
                 <div className="flex flex-col space-y-3">
                   <Button variant="ghost" className="justify-start" asChild>
                     <Link
-                      to="/login"
+                      to="/auth/login"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Login
@@ -177,7 +178,7 @@ const Header = ({ isLoggedIn = false, userName = "User" }: HeaderProps) => {
                   </Button>
                   <Button className="w-full" asChild>
                     <Link
-                      to="/signup"
+                      to="/auth/register"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Sign Up

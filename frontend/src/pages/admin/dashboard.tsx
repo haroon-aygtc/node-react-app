@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Globe,
   Users,
+  Cpu,
 } from "lucide-react";
 
 import Sidebar from "../../components/admin/Sidebar";
@@ -34,6 +35,7 @@ import PromptTemplates from "../../components/admin/PromptTemplates";
 import AnalyticsDashboard from "../../components/admin/AnalyticsDashboard";
 import EmbedCodeGenerator from "../../components/admin/EmbedCodeGenerator";
 import AIResponseFormatter from "../../components/admin/AIResponseFormatter";
+import AIModelConfiguration from "../../components/admin/AIModelConfiguration";
 import ScrapingConfigurator from "../../components/admin/scraping/ScrapingConfigurator";
 import SavedSelectorsPage from "../admin/scraping/selectors";
 import ScrapingHistoryPage from "../admin/scraping/history";
@@ -132,6 +134,13 @@ const Dashboard = () => {
               >
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">Response Formatter</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="ai-models"
+                className="flex items-center gap-2"
+              >
+                <Cpu className="h-4 w-4" />
+                <span className="hidden sm:inline">AI Models</span>
               </TabsTrigger>
               <TabsTrigger value="scraping" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
@@ -292,6 +301,10 @@ const Dashboard = () => {
 
             <TabsContent value="response-formatter">
               <AIResponseFormatter />
+            </TabsContent>
+
+            <TabsContent value="ai-models">
+              <AIModelConfiguration />
             </TabsContent>
 
             <TabsContent value="scraping">

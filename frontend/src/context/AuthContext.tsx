@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import { User, AuthState } from "@/types/auth";
+import * as authService from "@/services/authService";
 
 type AuthAction =
   | { type: "LOGIN_START" }
@@ -9,7 +10,7 @@ type AuthAction =
   | { type: "CLEAR_ERROR" };
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   loginWithRole: (role: "admin" | "user") => Promise<boolean>;
   logout: () => void;
@@ -112,47 +113,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // In a real app, this would be an API call to authenticate
-      // For demo purposes, we'll use a mock authentication
-      if (email === "admin@example.com" && password === "admin123") {
-        // Generate a mock token
-        const token = "mock-jwt-token-" + Date.now();
+      // Call the login API
+      const response = await authService.login({ email, password });
 
-        // Store in localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(mockUsers.admin));
+      // Store in localStorage
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
 
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user: mockUsers.admin, token },
-        });
-      } else if (email === "user@example.com" && password === "user123") {
-        // Generate a mock token
-        const token = "mock-jwt-token-" + Date.now();
+      dispatch({
+        type: "LOGIN_SUCCESS",
+        payload: { user: response.user, token: response.token },
+      });
 
-        // Store in localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(mockUsers.user));
-
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user: mockUsers.user, token },
-        });
-      } else {
-        dispatch({
-          type: "LOGIN_FAILURE",
-          payload: "Invalid email or password",
-        });
-      }
+      return true; // Login successful
     } catch (error) {
       dispatch({
         type: "LOGIN_FAILURE",
-        payload: "Authentication failed. Please try again.",
+        payload: error instanceof Error ? error.message : "Authentication failed. Please try again.",
       });
+
+      return false; // Login failed
     }
   };
 
@@ -186,8 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    authService.logout();
     dispatch({ type: "LOGOUT" });
   };
 
@@ -200,17 +183,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // In a real app, this would be an API call to register the user
-      // For demo purposes, we'll simulate a successful registration
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call the register API - this should return user and token
+      const response = await authService.register({ name, email, password });
 
-      // For demo, we'll just return success without actually creating a user
-      dispatch({ type: "CLEAR_ERROR" });
+      // Store token and user in localStorage
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+
+      // Update auth state
+      dispatch({
+        type: "LOGIN_SUCCESS",
+        payload: { user: response.user, token: response.token },
+      });
+
       return true;
     } catch (error) {
       dispatch({
         type: "LOGIN_FAILURE",
-        payload: "Registration failed. Please try again.",
+        payload: error instanceof Error ? error.message : "Registration failed. Please try again.",
       });
 
       return false;

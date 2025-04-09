@@ -37,6 +37,14 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface GuestUser {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  createdAt: Date;
+}
+
 export interface AnswerOption {
   id: string;
   text: string;
@@ -55,4 +63,21 @@ export interface ResponseFormat {
   description: string;
   template: string;
   followUpQuestions?: FollowUpQuestion[];
+}
+
+export interface AIModel {
+  id: string;
+  name: string;
+  description: string;
+  provider: string;
+  modelId: string;
+  apiKey: string;
+  apiEndpoint?: string;
+  maxTokens: number;
+  temperature: number;
+  isActive: boolean;
+  contextLength: number;
+  costPerToken: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
