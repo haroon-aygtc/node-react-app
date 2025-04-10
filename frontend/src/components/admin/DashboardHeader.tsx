@@ -30,6 +30,8 @@ const DashboardHeader = ({
   userAvatar = "",
   notificationCount = 3,
 }: DashboardHeaderProps) => {
+  const { logout } = useAuth();
+
   return (
     <header className="bg-card border-b border-color p-4 flex items-center justify-between w-full h-20 shadow-sm">
       <div className="flex items-center">

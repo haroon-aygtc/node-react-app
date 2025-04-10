@@ -1,25 +1,41 @@
-.history
+# Node modules
+node_modules/
+
+# Environment files
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-node_modules
-
-# Environment variables
-.env
+.env.*.local
 
 # Logs
-logs
-*.log
 *.log
 
-# Runtime data
-pids
-*.pid
-*.pid
+# Build output
+dist/
+build/
+out/
+.vite/
 
-# Dependency directories
+# OS files
+.DS_Store
+Thumbs.db
 
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Misc
+*.tgz
+*.gz
+*.zip
+*.bak
+*.tmp
+*.swp
+*.swo
+*.swn

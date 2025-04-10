@@ -29,35 +29,7 @@ export const getAllAIModels = async (): Promise<AIModel[]> => {
     return data.data.aiModels;
   } catch (error) {
     console.error("Error fetching AI models:", error);
-    // For demo purposes, return mock data if API fails
-    return [
-      {
-        id: "1",
-        name: "Default GPT-4 Model",
-        description: "OpenAI GPT-4 for general purpose use",
-        provider: "openai",
-        modelId: "gpt-4",
-        apiKey: "sk-xxxxxxxxxxxxxxxxxxxx",
-        maxTokens: 2048,
-        temperature: 0.7,
-        isActive: true,
-        contextLength: 8192,
-        costPerToken: 0.00006,
-      },
-      {
-        id: "2",
-        name: "Claude Assistant",
-        description: "Anthropic Claude for customer support",
-        provider: "anthropic",
-        modelId: "claude-3-sonnet",
-        apiKey: "sk-ant-xxxxxxxxxxxxxxxxxxxx",
-        maxTokens: 4096,
-        temperature: 0.5,
-        isActive: false,
-        contextLength: 100000,
-        costPerToken: 0.00008,
-      },
-    ];
+    throw error;
   }
 };
 

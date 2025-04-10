@@ -312,8 +312,12 @@ class WebSocketService {
 }
 
 // Create a singleton instance with a configurable URL
-// In a real implementation, this would come from environment variables
-const WS_URL = import.meta.env.VITE_WS_URL || "wss://chat-api.example.com/ws";
+const WS_URL = import.meta.env.VITE_WS_URL;
+
+if (!WS_URL) {
+  console.error('VITE_WS_URL is not set! Please configure your WebSocket URL in the .env file.');
+}
+
 const websocketService = new WebSocketService(WS_URL);
 
 export default websocketService;
