@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
@@ -22,10 +23,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Lock, User, ShieldCheck, Loader2, Mail } from "lucide-react";
 
-// Define the form schema using zod
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
@@ -34,11 +33,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const LoginForm = () => {
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, clearError } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Initialize form with react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,42 +49,36 @@ const LoginForm = () => {
     clearError();
 
     try {
-      // Attempt to login and get success status
       const success = await login(values.email, values.password);
 
       if (success) {
-        // Show success toast only if login was successful
         toast({
           title: "Login successful!",
-          description: "Welcome back to ChatEmbed.",
+          description: "Welcome back to ChatEmbed. Redirecting to dashboard...",
           variant: "default",
         });
-        // Navigate to dashboard based on user role
         const user = JSON.parse(localStorage.getItem("user") || '{}');
         const isAdmin = user?.role?.toLowerCase() === 'admin';
 
-        if (isAdmin) {
-          navigate("/admin/dashboard", { replace: true });
-        } else {
-          navigate("/dashboard", { replace: true });
-        }
+        setTimeout(() => {
+          if (isAdmin) {
+            navigate("/admin/dashboard", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
+        }, 1500);
       } else {
-        // Show error toast if login failed but no exception was thrown
-        // This shouldn't normally happen as failures throw exceptions
         toast({
           title: "Login failed",
-          description: "Invalid credentials. Please try again.",
+          description: "Please try again later.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      // Error is handled in the auth context
       console.error("Login error:", error);
-
-      // Show error toast
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials. Please try again.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     }
@@ -145,11 +137,7 @@ const LoginForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField

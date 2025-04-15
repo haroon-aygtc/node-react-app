@@ -25,10 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Lock, User, Mail, CheckCircle, Loader2 } from "lucide-react";
 
-// Define the form schema using zod
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -45,7 +43,6 @@ const RegisterForm = () => {
   const { register, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
 
-  // Initialize form with react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,22 +68,17 @@ const RegisterForm = () => {
       );
 
       if (success) {
-        // Show success toast
         toast({
           title: "Registration successful!",
           description: "Welcome to ChatEmbed. Redirecting to dashboard...",
           variant: "default",
         });
 
-        // Short delay for toast to be visible
         setTimeout(() => {
-          // Redirect to admin dashboard after successful registration
-          // Since we're now registering all users as admins
           navigate("/admin/dashboard", { replace: true });
         }, 1500);
       }
     } catch (error) {
-      // Error is handled in the auth context
       console.error("Registration error:", error);
       toast({
         title: "Registration failed",
@@ -151,11 +143,7 @@ const RegisterForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+             
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
