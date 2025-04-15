@@ -1,14 +1,25 @@
-import prisma from '../config/prisma';
-import type { Guest } from '../models/Guest';
+import prisma from '../config/prisma.js';
+import type { Guest } from '../models/index.js';
 
 export async function registerGuest(data: Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>): Promise<Guest> {
-  return prisma.guest.create({ data }) as unknown as Guest;
+  // Since Guest is a custom type not directly mapped to a Prisma model,
+  // we need to handle it differently
+  const result = await prisma.$queryRaw`
+    INSERT INTO Guest (fullName, email, phone)
+    VALUES (${data.fullName}, ${data.email}, ${data.phone || null})
+    RETURNING *
+  `;
+  return result[0] as Guest;
 }
 
 export async function getAllGuests(): Promise<Guest[]> {
-  return prisma.guest.findMany() as unknown as Guest[];
+  // Using raw query since Guest is a custom type
+  const result = await prisma.$queryRaw`SELECT * FROM Guest`;
+  return result as Guest[];
 }
 
 export async function getGuestById(id: string): Promise<Guest | null> {
-  return prisma.guest.findUnique({ where: { id } }) as unknown as Guest | null;
+  // Using raw query since Guest is a custom type
+  const result = await prisma.$queryRaw`SELECT * FROM Guest WHERE id = ${id}`;
+  return result.length ? (result[0] as Guest) : null;
 }

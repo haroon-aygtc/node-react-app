@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, Search, Settings, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -31,6 +31,7 @@ const DashboardHeader = ({
   notificationCount = 3,
 }: DashboardHeaderProps) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="bg-card border-b border-color p-4 flex items-center justify-between w-full h-20 shadow-sm">
@@ -141,6 +142,7 @@ const DashboardHeader = ({
               className="cursor-pointer text-red-600"
               onClick={() => {
                 logout();
+                navigate('/');
               }}
             >
               Logout

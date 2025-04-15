@@ -1,5 +1,5 @@
-import prisma from '../config/prisma';
-import type { User } from '../models/User';
+import prisma from '../config/prisma.js';
+import type { User } from '../models/index.js';
 
 export async function getUserById(id: string): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });

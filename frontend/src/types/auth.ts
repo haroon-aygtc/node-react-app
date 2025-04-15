@@ -33,6 +33,7 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   message: string;
   user: User;
+  token: string;
 }
 
 export interface LoginResponse {
@@ -99,4 +100,3 @@ export interface ResendVerificationEmailResponse {
 export interface VerifyEmailResponse {
   message: string;
 }
-

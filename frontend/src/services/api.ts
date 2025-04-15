@@ -3,8 +3,9 @@
  * Centralized service for making API requests
  */
 
-// Get API URL from environment variables or use default
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// When using Vite proxy, we can use relative URLs
+// This will be automatically proxied to the backend
+const API_URL = '/api';
 
 // Default request headers
 const defaultHeaders = {
@@ -13,23 +14,60 @@ const defaultHeaders = {
 
 // Helper function to handle API responses
 const handleResponse = async (response: Response) => {
-  const data = await response.json();
-  console.log('API response:', { status: response.status, data });
+  // Log the raw response for debugging
+  console.log('Raw API response:', {
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries([...response.headers.entries()])
+  });
 
-  if (!response.ok) {
-    // Extract error message from response
-    const errorMessage = data.message || 'Something went wrong';
-    console.error('API error response:', { status: response.status, message: errorMessage });
-    throw new Error(errorMessage);
+  // Clone the response to read it multiple times if needed
+  const clonedResponse = response.clone();
+
+  try {
+    // Try to parse the response as JSON
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+      console.log('API response data (JSON):', data);
+    } else {
+      // If not JSON, get the text content
+      const textContent = await response.text();
+      console.log('API response data (Text):', textContent);
+      // Try to parse it as JSON anyway in case the content-type header is wrong
+      try {
+        data = JSON.parse(textContent);
+        console.log('Parsed text as JSON:', data);
+      } catch (e) {
+        console.log('Could not parse text as JSON, using as is');
+        data = { message: textContent };
+      }
+    }
+
+    if (!response.ok) {
+      // Extract error message from response
+      const errorMessage = data.error?.message || data.message || 'Something went wrong';
+      console.error('API error response:', { status: response.status, message: errorMessage, data });
+      throw new Error(errorMessage);
+    }
+
+    // Check for application-level errors
+    if (data.status === 'error') {
+      console.error('Application error:', data);
+      throw new Error(data.message || 'Application error');
+    }
+
+    return data;
+  } catch (error) {
+    // If JSON parsing fails, try to get the text content
+    if (error instanceof SyntaxError) {
+      const textContent = await clonedResponse.text();
+      console.error('Failed to parse JSON response:', { textContent });
+      throw new Error('Invalid response format from server');
+    }
+    throw error;
   }
-
-  // Check for application-level errors
-  if (data.status === 'error') {
-    console.error('Application error:', data.message);
-    throw new Error(data.message || 'Application error');
-  }
-
-  return data;
 };
 
 // Helper function to get auth headers
@@ -73,6 +111,12 @@ export const apiRequest = async (
     if (method !== 'GET' && data) {
       options.body = JSON.stringify(data);
     }
+
+    // Log the request details for debugging
+    console.log(`Making ${method} request to ${url}`, {
+      headers: options.headers,
+      body: method !== 'GET' && data ? data : undefined
+    });
 
     // Make the request
     const response = await fetch(url, options);

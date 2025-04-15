@@ -3,9 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init",
+    "db:check": "node backend/scripts/checkPrisma.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:generate": "npx prisma generate",
+    "db:reset": "npx prisma migrate reset --force",
+    "test": "jest",
+    "start": "node backend/src/server.ts",
     "dev": "concurrently \"npm --prefix backend start\" \"npm --prefix frontend run dev\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5"
   }
 }

@@ -8,7 +8,7 @@
 
 ```bash
 cd backend
-npm run db:setup
+npm run db:setup-migrations
 ```
 
 ---

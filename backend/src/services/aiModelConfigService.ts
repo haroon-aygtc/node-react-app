@@ -1,5 +1,5 @@
-import * as aiRepo from '../repositories/aiModelConfigRepository';
-import type { AIModelConfig } from '../models/AIModelConfig';
+import * as aiRepo from '../repositories/aiModelConfigRepository.js';
+import type { AIModelConfig } from '../models/index.js';
 
 export async function createAIModelConfig(data: Omit<AIModelConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<AIModelConfig> {
   if (!data.name.trim()) throw new Error('Name is required');

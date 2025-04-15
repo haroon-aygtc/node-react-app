@@ -26,7 +26,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MessageSquare, Lock, User, Mail, CheckCircle } from "lucide-react";
+import { MessageSquare, Lock, User, Mail, CheckCircle, Loader2 } from "lucide-react";
 
 // Define the form schema using zod
 const formSchema = z.object({
@@ -80,9 +80,9 @@ const RegisterForm = () => {
 
         // Short delay for toast to be visible
         setTimeout(() => {
-          // Redirect to dashboard after successful registration and auto-login
-          // Regular users go to /dashboard, not /admin/dashboard
-          navigate("/dashboard", { replace: true });
+          // Redirect to admin dashboard after successful registration
+          // Since we're now registering all users as admins
+          navigate("/admin/dashboard", { replace: true });
         }, 1500);
       }
     } catch (error) {
@@ -144,10 +144,10 @@ const RegisterForm = () => {
                 </div>
               </div>
               <CardTitle className="text-2xl font-bold text-center text-foreground-color">
-                Create an Account
+                Create an Admin Account
               </CardTitle>
               <CardDescription className="text-center text-muted-color">
-                Enter your details to register for ChatEmbed
+                Enter your details to register as an admin for ChatEmbed
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -257,7 +257,14 @@ const RegisterForm = () => {
                   />
 
                   <Button type="submit" className="w-full button-primary-theme" disabled={isLoading || isSubmitting}>
-                    {isLoading || isSubmitting ? "Creating Account..." : "Register"}
+                    {isLoading || isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Register"
+                    )}
                   </Button>
                 </form>
               </Form>

@@ -1,11 +1,17 @@
 import { Router } from 'express';
 import * as userController from '../controllers/userController';
+import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', userController.getAllUsers);
+// Public routes
 router.get('/:id', userController.getUserById);
-router.put('/:id', userController.updateUser);
-router.delete('/:id', userController.deleteUser);
+
+// Protected routes - require authentication
+router.get('/', authenticate, userController.getAllUsers);
+router.put('/:id', authenticate, userController.updateUser);
+
+// Admin-only routes
+router.delete('/:id', authenticate, authorize(['admin']), userController.deleteUser);
 
 export default router;

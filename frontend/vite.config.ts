@@ -19,11 +19,13 @@ export default defineConfig({
   server: {
     // @ts-ignore
     allowedHosts: true,
+    port: 5177, // Explicitly set port to match your frontend URL
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'), // Keep the /api prefix
       },
     },
   },

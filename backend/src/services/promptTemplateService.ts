@@ -1,5 +1,5 @@
-import * as promptRepo from '../repositories/promptTemplateRepository';
-import type { PromptTemplate } from '../models/PromptTemplate';
+import * as promptRepo from '../repositories/promptTemplateRepository.js';
+import type { PromptTemplate } from '../models/index.js';
 
 export async function createPromptTemplate(data: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<PromptTemplate> {
   if (!data.name.trim()) throw new Error('Name is required');

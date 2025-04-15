@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
-
-const prisma = new PrismaClient();
+import prisma from '../config/prisma.js';
 
 export const getAllFollowUpConfigs = async (req: Request, res: Response) => {
   const configs = await prisma.followUpConfig.findMany();

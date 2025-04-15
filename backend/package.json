@@ -2,17 +2,19 @@
   "type": "module",
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.ts",
   "scripts": {
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "npx prisma migrate dev --name init",
-    "db:check": "node scripts/checkDatabase.cjs",
-    "db:setup": "node scripts/setupDatabase.cjs",
+    "db:check": "node scripts/checkPrisma.js",
     "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate",
     "db:reset": "npx prisma migrate reset --force",
+    "db:setup-migrations": "node scripts/setupMigrations.js",
     "test": "jest",
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "start:dev": "NODE_ENV=development tsx src/server.ts",
+    "start:prod": "NODE_ENV=production tsx src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +22,7 @@
   "description": "",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
@@ -33,9 +36,14 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.1.2",
+    "winston": "^3.17.0"
   }
 }

@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
-
-const prisma = new PrismaClient();
+import prisma from '../config/prisma.js';
 
 export const getAllModerationRules = async (req: Request, res: Response) => {
   const rules = await prisma.moderationRule.findMany();

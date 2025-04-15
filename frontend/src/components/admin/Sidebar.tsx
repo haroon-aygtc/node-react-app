@@ -408,8 +408,7 @@ const Sidebar = ({
           )}
           onClick={() => {
             logout();
-            // Use navigate for client-side navigation
-            navigate("/login");
+            navigate('/');
           }}
         >
           <TooltipProvider delayDuration={300}>

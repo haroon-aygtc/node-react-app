@@ -12,7 +12,6 @@ type AuthAction =
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
-  loginWithRole: (role: "admin" | "user") => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
 }
@@ -76,25 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Mock users for demo purposes
-  const mockUsers = {
-    admin: {
-      id: "1",
-      email: "admin@example.com",
-      name: "Admin User",
-      role: "admin" as const,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
-    },
-    user: {
-      id: "2",
-      email: "user@example.com",
-      name: "Regular User",
-      role: "user" as const,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
-    }
-  };
-
-  // Check if token exists and validate on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -117,10 +97,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // Call the login API
       const response = await authService.login({ email, password });
+      console.log('Login API response:', response);
 
-      // Store in localStorage
+      if (!response || !response.token) {
+        throw new Error('Invalid response from server');
+      }
+
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
@@ -129,40 +112,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         payload: { user: response.user, token: response.token },
       });
 
-      return true; // Login successful
+      return true;
     } catch (error) {
+      console.error('Login error details:', error);
       dispatch({
         type: "LOGIN_FAILURE",
         payload: error instanceof Error ? error.message : "Authentication failed. Please try again.",
-      });
-
-      return false; // Login failed
-    }
-  };
-
-  // Function to login with a specific role (for mock buttons)
-  const loginWithRole = async (role: "admin" | "user") => {
-    dispatch({ type: "LOGIN_START" });
-
-    try {
-      // Generate a mock token
-      const token = "mock-jwt-token-" + Date.now();
-      const user = mockUsers[role];
-
-      // Store in localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      dispatch({
-        type: "LOGIN_SUCCESS",
-        payload: { user, token },
-      });
-
-      return true;
-    } catch (error) {
-      dispatch({
-        type: "LOGIN_FAILURE",
-        payload: "Authentication failed. Please try again.",
       });
 
       return false;
@@ -170,27 +125,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = () => {
-    authService.logout();
-    dispatch({ type: "LOGOUT" });
+    authService.logout(); // Logout on the server
+    authService.clearLocalStorage(); // Clear local storage
+    dispatch({ type: "LOGOUT" }); // Logout locally
   };
 
   const clearError = () => {
     dispatch({ type: "CLEAR_ERROR" });
   };
 
-  // Function to register a new user
   const register = async (name: string, email: string, password: string) => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // Call the register API - this should return user and token
       const response = await authService.register({ name, email, password });
+      console.log('Register API response:', response);
 
-      // Store token and user in localStorage
+      if (!response || !response.token) {
+        throw new Error('Invalid response from server');
+      }
+
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
-      // Update auth state
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: { user: response.user, token: response.token },
@@ -198,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       return true;
     } catch (error) {
+      console.error('Registration error details:', error);
       dispatch({
         type: "LOGIN_FAILURE",
         payload: error instanceof Error ? error.message : "Registration failed. Please try again.",
@@ -213,7 +171,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         ...state,
         login,
         register,
-        loginWithRole,
         logout,
         clearError,
       }}

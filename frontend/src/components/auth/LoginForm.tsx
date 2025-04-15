@@ -34,7 +34,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const LoginForm = () => {
-  const { login, loginWithRole, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -220,55 +220,8 @@ const LoginForm = () => {
                   </Button>
                 </form>
               </Form>
-
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Or login with mock accounts
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isLoading}
-                  onClick={async () => {
-                    const success = await loginWithRole("admin");
-                    if (success) navigate("/admin/dashboard");
-                  }}
-                  className="flex items-center justify-center gap-2"
-                >
-                  <ShieldCheck className="h-4 w-4" />
-                  Admin
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isLoading}
-                  onClick={async () => {
-                    const success = await loginWithRole("user");
-                    if (success) navigate("/admin/dashboard");
-                  }}
-                  className="flex items-center justify-center gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  User
-                </Button>
-              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2 text-center">
-              <p className="text-sm text-gray-500">
-                <strong>Admin:</strong> admin@example.com / admin123
-              </p>
-              <p className="text-sm text-gray-500">
-                <strong>User:</strong> user@example.com / user123
-              </p>
               <p className="text-sm text-muted-foreground mt-4">
                 Don't have an account?{" "}
                 <Link to="/auth/register" className="text-primary hover:underline">

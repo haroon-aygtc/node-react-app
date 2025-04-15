@@ -7,7 +7,7 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -18,19 +18,9 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  console.log('AdminRoute check:', { isAuthenticated, userRole: user?.role });
-
-  // Check if user is authenticated and has admin role
-  // The role might be 'admin' or 'ADMIN' depending on the backend
-  const isAdmin = user?.role?.toLowerCase() === 'admin';
-
-  if (!isAuthenticated || !isAdmin) {
-    console.log('Access denied, redirecting to login');
-    console.log('User role:', user?.role);
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
-
-  console.log('Access granted to admin route');
 
   return <>{children}</>;
 };

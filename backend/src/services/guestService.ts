@@ -1,5 +1,5 @@
-import * as guestRepo from '../repositories/guestRepository';
-import type { Guest } from '../models/Guest';
+import * as guestRepo from '../repositories/guestRepository.js';
+import type { Guest } from '../models/index.js';
 
 export async function registerGuest(data: {
   fullName: string;

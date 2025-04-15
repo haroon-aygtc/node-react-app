@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate } from '../middleware/auth.js';
 import {
   getAllApiKeys,
   getApiKeyById,
@@ -9,10 +10,11 @@ import {
 
 const router = express.Router();
 
-router.get('/', getAllApiKeys);
-router.get('/:id', getApiKeyById);
-router.post('/', createApiKey);
-router.put('/:id', updateApiKey);
-router.delete('/:id', deleteApiKey);
+// All API key routes require authentication
+router.get('/', authenticate, getAllApiKeys);
+router.get('/:id', authenticate, getApiKeyById);
+router.post('/', authenticate, createApiKey);
+router.put('/:id', authenticate, updateApiKey);
+router.delete('/:id', authenticate, deleteApiKey);
 
 export default router;

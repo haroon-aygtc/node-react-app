@@ -1,6 +1,5 @@
-import * as chatRepo from '../repositories/chatRepository';
-import type { ChatSession } from '../models/ChatSession';
-import type { ChatMessage } from '../models/ChatMessage';
+import * as chatRepo from '../repositories/chatRepository.js';
+import type { ChatSession, ChatMessage } from '../models/index.js';
 
 export async function startSession(userId: string, contextRuleId?: string | null): Promise<ChatSession> {
   return chatRepo.createSession({ userId, contextRuleId });
