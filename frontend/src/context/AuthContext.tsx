@@ -20,7 +20,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem("token"),
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true, // Start with loading true
   error: null,
 };
 
@@ -58,6 +58,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: null,
         token: null,
         isAuthenticated: false,
+        isLoading: false,
         error: null,
       };
     case "CLEAR_ERROR":
@@ -76,21 +77,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (token && storedUser) {
+    const initializeAuth = async () => {
       try {
-        const user = JSON.parse(storedUser) as User;
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user, token },
-        });
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if (!token || !storedUser) {
+          // No stored credentials, set not loading and not authenticated
+          console.log('No stored credentials found');
+          dispatch({ type: "LOGOUT" });
+          return;
+        }
+
+        try {
+          const user = JSON.parse(storedUser) as User;
+
+          // Check if token is expired by trying to get current user
+          try {
+            console.log('Validating stored token...');
+            await authService.getCurrentUser();
+            // If successful, user is authenticated
+            console.log('Token is valid, user authenticated');
+            dispatch({
+              type: "LOGIN_SUCCESS",
+              payload: { user, token },
+            });
+          } catch (error) {
+            console.log('Token may be expired, trying to refresh...');
+            // Try to refresh the token
+            try {
+              const refreshResponse = await authService.refreshToken();
+              // Update with new token and user data
+              localStorage.setItem("token", refreshResponse.token);
+              localStorage.setItem("user", JSON.stringify(refreshResponse.user));
+
+              console.log('Token refreshed successfully');
+              dispatch({
+                type: "LOGIN_SUCCESS",
+                payload: {
+                  user: refreshResponse.user,
+                  token: refreshResponse.token
+                },
+              });
+            } catch (refreshError) {
+              console.error('Failed to refresh token:', refreshError);
+              // Clear storage if refresh fails
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              dispatch({ type: "LOGOUT" });
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing stored user:', error);
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          dispatch({ type: "LOGOUT" });
+        }
       } catch (error) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        console.error('Error during auth initialization:', error);
+        dispatch({ type: "LOGOUT" });
       }
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -158,7 +207,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Registration error details:', error);
       dispatch({
         type: "LOGIN_FAILURE",
-        payload: error instanceof Error ? error.message : "Registration failed. Please try again.",
+        payload: error instanceof Error ? error.message : "Registration failed",
       });
 
       return false;

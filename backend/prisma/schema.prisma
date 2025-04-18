@@ -8,19 +8,19 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
   passwordHash  String
   fullName      String?
-  role          String   @default("user")
-  isActive      Boolean  @default(true)
-  emailVerified Boolean  @default(false)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
   avatarUrl     String?
   metadata      Json?
   lastLoginAt   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
+  userRoles     UserRole[]
   activities    UserActivity[]
   followUpConfigs FollowUpConfig[]
   chatSessions  ChatSession[]
@@ -35,22 +35,22 @@ model User {
 }
 
 model UserActivity {
-  id         String   @id @default(uuid())
-  userId     String
+  id         Int       @id @default(autoincrement())
+  userId     Int
   action     String
   ipAddress  String?
   userAgent  String?
   metadata   Json?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model FollowUpConfig {
-  id                     String                 @id @default(uuid())
-  userId                 String
+  id                     Int                    @id @default(autoincrement())
+  userId                 Int
   name                   String
-  enableFollowUpQuestions Boolean               @default(true)
+  enableFollowUpQuestions Boolean                @default(true)
   maxFollowUpQuestions   Int                    @default(3)
   showFollowUpAs         String                 @default("buttons")
   generateAutomatically  Boolean                @default(true)
@@ -64,189 +64,245 @@ model FollowUpConfig {
 }
 
 model PredefinedQuestionSet {
-  id            String   @id @default(uuid())
-  configId      String
+  id            Int       @id @default(autoincrement())
+  configId      Int
   name          String
   description   String?
   triggerKeywords Json
   questions     Json
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   config        FollowUpConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
 }
 
 model TopicBasedQuestionSet {
-  id          String   @id @default(uuid())
-  configId    String
+  id          Int       @id @default(autoincrement())
+  configId    Int
   topic       String
   questions   Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   config      FollowUpConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
 }
 
 model PromptTemplate {
-  id            String   @id @default(uuid())
+  id            Int       @id @default(autoincrement())
   name          String
   description   String?
   templateText  String
   variables     Json
-  category      String   @default("general")
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  category      String    @default("general")
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model AICache {
-  id          String   @id @default(uuid())
+  id          Int       @id @default(autoincrement())
   promptHash  String
   prompt      String
   response    String
   modelUsed   String
   metadata    Json?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   expiresAt   DateTime
 }
 
 model ChatSession {
-  id          String   @id @default(uuid())
-  userId      String
-  status      String   @default("active")
-  contextRuleId String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  status      String    @default("active")
+  contextRuleId Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages    ChatMessage[]
 }
 
 model ChatMessage {
-  id          String   @id @default(uuid())
-  sessionId   String
+  id          Int       @id @default(autoincrement())
+  sessionId   Int
   sender      String
   content     String
   modelUsed   String?
   metadata    Json?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   session     ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model WidgetConfig {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   name        String
   settings    Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ApiKey {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   name        String
   key         String
   provider    String
   lastUsedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model KnowledgeBaseEntry {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   title       String
   content     String
   category    String?
   tags        Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ModerationRule {
-  id          String   @id @default(uuid())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
   pattern     String
   action      String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model ScrapingJob {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   url         String
-  status      String   @default("pending")
+  status      String    @default("pending")
   result      Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ResponseFormattingConfig {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   name        String
   rules       Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ScrapingSelector {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   name        String
   description String?
   config      Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   scrapingData ScrapingData[]
 }
 
 model ScrapingData {
-  id          String   @id @default(uuid())
-  selectorId  String
+  id          Int       @id @default(autoincrement())
+  selectorId  Int
   url         String
   data        Json
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   selector    ScrapingSelector @relation(fields: [selectorId], references: [id], onDelete: Cascade)
 }
 
 model AnalyticsLog {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   eventType   String
   details     Json
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MonitoringLog {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int       @id @default(autoincrement())
+  userId      Int
   type        String
   message     String
   details     Json?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Role {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  description   String?
+  isDefault     Boolean  @default(false)
+  isSystem      Boolean  @default(false) // System roles cannot be deleted
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userRoles     UserRole[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique // e.g., "users:read", "users:write"
+  description   String?
+  category      String   // For grouping permissions (e.g., "users", "widgets")
+  action        String   // The action type (e.g., "read", "write", "delete")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+}
+
+model UserRole {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  roleId        Int
+  assignedAt    DateTime @default(now())
+  assignedBy    Int?     // ID of the user who assigned this role
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  id            Int      @id @default(autoincrement())
+  roleId        Int
+  permissionId  Int
+  assignedAt    DateTime @default(now())
+  assignedBy    Int?     // ID of the user who assigned this permission
+  createdAt     DateTime @default(now())
+
+  role          Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission    Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId], name: "roleId_permissionId")
+  @@index([roleId])
+  @@index([permissionId])
 }

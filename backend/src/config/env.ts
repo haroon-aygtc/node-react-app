@@ -28,7 +28,9 @@ const env = {
 
   // Authentication
   jwt: {
-    secret: process.env.JWT_SECRET || 'changeme',
+    secret: process.env.JWT_SECRET || (process.env.NODE_ENV === 'production'
+      ? (function() { console.error('WARNING: JWT_SECRET not set in production!'); return 'insecure-default-secret-please-change'; }())
+      : 'development-secret'),
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },

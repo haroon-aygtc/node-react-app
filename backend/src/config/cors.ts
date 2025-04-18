@@ -7,6 +7,14 @@ const allowedLocalPatterns = [
   /^http:\/\/127\.0\.0\.1:\d+$/,  // allow IP-based local dev
 ];
 
+// Explicitly allow these origins for development
+const explicitlyAllowedOrigins = [
+  'http://localhost:5179',
+  'http://localhost:5178',
+  'http://localhost:5177',
+  'http://localhost:3000'
+];
+
 /**
  * Determines if the origin is allowed based on environment
  */
@@ -19,9 +27,13 @@ const isAllowedOrigin = (origin: string | undefined, isProd: boolean): boolean =
     return origin === env.cors.productionOrigin;
   }
 
-  // In development, allow any origin that matches the patterns
+  // In development, first check explicitly allowed origins
+  if (explicitlyAllowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  // Then check patterns for other local development origins
   // This means any localhost URL regardless of port will be allowed
-  // No need for hardcoded values in .env files
   return allowedLocalPatterns.some(pattern => pattern.test(origin));
 };
 

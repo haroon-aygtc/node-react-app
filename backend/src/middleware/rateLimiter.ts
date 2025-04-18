@@ -5,6 +5,7 @@ import logger from '../utils/logger.js';
 /**
  * Global rate limiter for all routes
  * Limits requests to 100 per 15 minutes per IP
+ * Excludes auth routes for login and register
  */
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -19,6 +20,11 @@ export const globalLimiter = rateLimit({
     });
     next(new RateLimitError());
   },
+  // Skip rate limiting for login and register routes
+  skip: (req, res) => {
+    const authPaths = ['/api/auth/login', '/api/auth/register'];
+    return authPaths.includes(req.path);
+  }
 });
 
 /**

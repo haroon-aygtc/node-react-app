@@ -52,6 +52,8 @@ import scrapingRoutes from './routes/scrapingRoutes.js';
 import analyticsLogRoutes from './routes/analyticsLogRoutes.js';
 import monitoringLogRoutes from './routes/monitoringLogRoutes.js';
 import guestRoutes from './routes/guestRoutes.js';
+import roleRoutes from './routes/roleRoutes.js';
+import permissionRoutes from './routes/permissionRoutes.js';
 
 app.use('/api/users', userRoutes);
 app.use('/api/user-activities', userActivityRoutes);
@@ -69,6 +71,8 @@ app.use('/api/scraping', scrapingRoutes);
 app.use('/api/analytics-logs', analyticsLogRoutes);
 app.use('/api/monitoring-logs', monitoringLogRoutes);
 app.use('/api/guests', guestRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/permissions', permissionRoutes);
 
 // 404 handler for undefined routes
 app.use((req, res) => {

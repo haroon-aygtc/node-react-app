@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
   Tabs,
   TabsContent,
@@ -48,6 +49,7 @@ const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("overview");
   const [activeSubTab, setActiveSubTab] = useState("");
   const location = useLocation();
+  const { user } = useAuth();
 
   // Handle tab activation from route state
   useEffect(() => {
@@ -72,8 +74,9 @@ const Dashboard = () => {
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggleCollapse={toggleSidebar}
-        userName="Admin User"
-        userEmail="admin@example.com"
+        userName={user?.fullName || user?.name}
+        userEmail={user?.email}
+        userAvatar={user?.avatarUrl || user?.avatar}
         onTabChange={(tab, subTab) => {
           setActiveSection(tab);
           if (subTab) {
@@ -86,9 +89,8 @@ const Dashboard = () => {
       <div className="flex flex-col flex-1 overflow-hidden dashboard-content">
         <DashboardHeader
           title="Admin Dashboard"
-          username="Admin User"
-          userAvatar="https://api.dicebear.com/7.x/avataaars/svg?seed=admin"
-          notificationCount={3}
+          username={user?.fullName || user?.name}
+          userAvatar={user?.avatarUrl || user?.avatar}
         />
 
         <main className="flex-1 overflow-y-auto p-6">

@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'; // eslint-disable-line no-unused-vars
 import { authenticate } from '../middleware/auth.js';
 import {
   getAllApiKeys,
@@ -6,15 +6,15 @@ import {
   createApiKey,
   updateApiKey,
   deleteApiKey,
-} from '../controllers/apiKeyController';
+} from '../controllers/apiKeyController.js';
 
 const router = express.Router();
 
 // All API key routes require authentication
-router.get('/', authenticate, getAllApiKeys);
-router.get('/:id', authenticate, getApiKeyById);
-router.post('/', authenticate, createApiKey);
-router.put('/:id', authenticate, updateApiKey);
-router.delete('/:id', authenticate, deleteApiKey);
+router.get('/', authenticate, getAllApiKeys as any);
+router.get('/:id', authenticate, getApiKeyById as any);
+router.post('/', authenticate, createApiKey as any);
+router.put('/:id', authenticate, updateApiKey as any);
+router.delete('/:id', authenticate, deleteApiKey as any);
 
 export default router;

@@ -6,11 +6,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 // Helper function to handle API responses
 const handleResponse = async (response: Response) => {
   const data = await response.json();
-  
+
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    console.error("API error response:", { status: response.status, message: data.message, data });
+    throw new Error(data.message || "Authentication failed");
   }
-  
+
   return data;
 };
 
@@ -24,7 +25,7 @@ export const getAllAIModels = async (): Promise<AIModel[]> => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModels;
   } catch (error) {
@@ -43,7 +44,7 @@ export const getAIModel = async (id: string): Promise<AIModel> => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModel;
   } catch (error) {
@@ -63,7 +64,7 @@ export const createAIModel = async (aiModel: Omit<AIModel, "id">): Promise<AIMod
       },
       body: JSON.stringify(aiModel),
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModel;
   } catch (error) {
@@ -83,7 +84,7 @@ export const updateAIModel = async (id: string, aiModel: Partial<AIModel>): Prom
       },
       body: JSON.stringify(aiModel),
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModel;
   } catch (error) {
@@ -102,7 +103,7 @@ export const deleteAIModel = async (id: string): Promise<void> => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    
+
     await handleResponse(response);
   } catch (error) {
     console.error(`Error deleting AI model ${id}:`, error);
@@ -120,7 +121,7 @@ export const toggleAIModelStatus = async (id: string): Promise<AIModel> => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModel;
   } catch (error) {
@@ -138,7 +139,7 @@ export const getActiveAIModel = async (): Promise<AIModel | null> => {
         "Content-Type": "application/json",
       },
     });
-    
+
     const data = await handleResponse(response);
     return data.data.aiModel;
   } catch (error) {

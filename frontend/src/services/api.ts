@@ -12,8 +12,12 @@ const defaultHeaders = {
   'Content-Type': 'application/json',
 };
 
+// Flag to prevent infinite refresh loops
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
 // Helper function to handle API responses
-const handleResponse = async (response: Response) => {
+const handleResponse = async (response: Response, endpoint: string, retryCount = 0) => {
   // Log the raw response for debugging
   console.log('Raw API response:', {
     status: response.status,
@@ -47,7 +51,7 @@ const handleResponse = async (response: Response) => {
 
     if (!response.ok) {
       // Extract error message from response
-      const errorMessage = data.error?.message || data.message || 'Something went wrong';
+      const errorMessage = data.error?.message || data.message || 'Authentication failed';
       console.error('API error response:', { status: response.status, message: errorMessage, data });
       throw new Error(errorMessage);
     }
@@ -55,7 +59,7 @@ const handleResponse = async (response: Response) => {
     // Check for application-level errors
     if (data.status === 'error') {
       console.error('Application error:', data);
-      throw new Error(data.message || 'Application error');
+      throw new Error(data.message || 'Authentication failed');
     }
 
     return data;
@@ -73,6 +77,9 @@ const handleResponse = async (response: Response) => {
 // Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('No token found in localStorage');
+  }
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
@@ -122,7 +129,65 @@ export const apiRequest = async (
     const response = await fetch(url, options);
 
     // Handle the response
-    return await handleResponse(response);
+    try {
+      return await handleResponse(response, endpoint);
+    } catch (error) {
+      // If we get a 401 Unauthorized error and this isn't already a refresh token request
+      // and we're not already refreshing, try to refresh the token and retry the request
+      if (
+        response.status === 401 &&
+        requiresAuth &&
+        endpoint !== 'auth/refresh-token' &&
+        endpoint !== 'auth/logout'
+      ) {
+        console.log('Got 401, attempting to refresh token...');
+
+        try {
+          // If we're already refreshing, wait for that to complete
+          if (isRefreshing && refreshPromise) {
+            await refreshPromise;
+          } else {
+            // Start refreshing
+            isRefreshing = true;
+            refreshPromise = (async () => {
+              try {
+                // Import dynamically to avoid circular dependency
+                const authService = await import('./authService');
+                const refreshResponse = await authService.refreshToken();
+
+                // Update token in localStorage
+                if (refreshResponse && refreshResponse.token) {
+                  localStorage.setItem('token', refreshResponse.token);
+                  localStorage.setItem('user', JSON.stringify(refreshResponse.user));
+                  console.log('Token refreshed successfully');
+                }
+              } catch (refreshError) {
+                console.error('Failed to refresh token:', refreshError);
+                // Clear auth data on refresh failure
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                // Redirect to login page
+                window.location.href = '/auth/login';
+                throw refreshError;
+              } finally {
+                isRefreshing = false;
+                refreshPromise = null;
+              }
+            })();
+
+            await refreshPromise;
+          }
+
+          // Retry the original request with the new token
+          console.log('Retrying original request with new token');
+          return await apiRequest(endpoint, method, data, requiresAuth);
+        } catch (refreshError) {
+          console.error('Error during token refresh:', refreshError);
+          throw error; // Throw the original error
+        }
+      }
+      throw error;
+    }
   } catch (error) {
     console.error(`API ${method} request to ${endpoint} failed:`, error);
     throw error;

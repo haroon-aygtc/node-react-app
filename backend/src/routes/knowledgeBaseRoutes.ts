@@ -1,18 +1,18 @@
-import express from 'express';
+import express from 'express'; // eslint-disable-line no-unused-vars
 import {
   getAllKnowledgeBaseEntries,
   getKnowledgeBaseEntryById,
   createKnowledgeBaseEntry,
   updateKnowledgeBaseEntry,
   deleteKnowledgeBaseEntry,
-} from '../controllers/knowledgeBaseController';
+} from '../controllers/knowledgeBaseController.js';
 
 const router = express.Router();
 
-router.get('/', getAllKnowledgeBaseEntries);
-router.get('/:id', getKnowledgeBaseEntryById);
-router.post('/', createKnowledgeBaseEntry);
-router.put('/:id', updateKnowledgeBaseEntry);
-router.delete('/:id', deleteKnowledgeBaseEntry);
+router.get('/', getAllKnowledgeBaseEntries as any);
+router.get('/:id', getKnowledgeBaseEntryById as any);
+router.post('/', createKnowledgeBaseEntry as any);
+router.put('/:id', updateKnowledgeBaseEntry as any);
+router.delete('/:id', deleteKnowledgeBaseEntry as any);
 
 export default router;

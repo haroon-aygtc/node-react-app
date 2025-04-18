@@ -15,6 +15,9 @@ import ScrapingProblemsPage from "../pages/admin/scraping/problems";
 import ScrapingVisualizationPage from "../pages/admin/scraping/visualization";
 import SettingsPage from "../pages/admin/settings";
 
+// User & Role Management page
+import UserManagementPage from "../pages/admin/user-management";
+
 // Import other admin components as they become available
 // For now, we'll redirect to dashboard for missing components
 
@@ -32,16 +35,6 @@ const AppRoutes = () => {
       <Route path="/register" element={<Navigate to="/auth/register" replace />} />
       <Route path="/signup" element={<Navigate to="/auth/register" replace />} />
 
-      {/* Admin Dashboard - Protected for admin users */}
-      <Route
-        path="/admin/dashboard"
-        element={
-          <AdminRoute>
-            <Dashboard />
-          </AdminRoute>
-        }
-      />
-
       {/* User Dashboard - Protected for all authenticated users */}
       <Route
         path="/dashboard"
@@ -49,6 +42,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Dashboard - Protected for admin users */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminRoute>
+            <Dashboard />
+          </AdminRoute>
         }
       />
 
@@ -200,12 +203,54 @@ const AppRoutes = () => {
         }
       />
 
-      {/* User Management */}
+      {/* User & Role Management */}
+      <Route
+        path="/admin/user-management"
+        element={
+          <AdminRoute>
+            <UserManagementPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/user-management/roles"
+        element={
+          <AdminRoute>
+            <UserManagementPage />
+          </AdminRoute>
+        }
+      />
+
+      {/* Redirects for old user and role management routes */}
       <Route
         path="/admin/users"
         element={
           <AdminRoute>
-            <Navigate to="/admin/dashboard" state={{ activeTab: "users" }} replace />
+            <Navigate to="/admin/user-management" replace />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/users/*"
+        element={
+          <AdminRoute>
+            <Navigate to="/admin/user-management" replace />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/roles"
+        element={
+          <AdminRoute>
+            <Navigate to="/admin/user-management/roles" replace />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/roles/*"
+        element={
+          <AdminRoute>
+            <Navigate to="/admin/user-management/roles" replace />
           </AdminRoute>
         }
       />

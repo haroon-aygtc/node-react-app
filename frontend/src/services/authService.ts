@@ -38,13 +38,9 @@ export const register = async (
     // Log the request data
     console.log('Register request data:', userData);
 
-    // Make the API call
+    // Use only the standard registration endpoint
     const response = await api.post("auth/register", userData);
-
-    // Log the raw response
     console.log('Register raw API response:', response);
-
-    // Return the response
     return response;
   } catch (error) {
     console.error("Register error:", error);
@@ -61,6 +57,21 @@ export const getCurrentUser = async () => {
     return response;
   } catch (error) {
     console.error("Get current user error:", error);
+    throw error;
+  }
+};
+
+/**
+ * Refresh access token using refresh token cookie
+ */
+export const refreshToken = async (): Promise<LoginResponse> => {
+  try {
+    console.log('Attempting to refresh token');
+    const response = await api.post("auth/refresh-token", {});
+    console.log('Refresh token response:', response);
+    return response;
+  } catch (error) {
+    console.error("Token refresh error:", error);
     throw error;
   }
 };

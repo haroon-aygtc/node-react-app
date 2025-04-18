@@ -14,6 +14,8 @@ import {
   ChevronRight,
   LogOut,
   Globe,
+  Shield,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,13 +37,26 @@ interface SidebarProps {
 
 const Sidebar = ({
   collapsed = false,
-  onToggleCollapse = () => {},
-  userName = "Admin User",
-  userEmail = "admin@example.com",
-  userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
-  onTabChange = (tab: string, subTab?: string) => {}
+  onToggleCollapse = () => { },
+  userName,
+  userEmail,
+  userAvatar,
+  onTabChange = (tab: string, subTab?: string) => { }
 }: SidebarProps) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  // Use authenticated user data if props are not provided
+  const displayName = userName || user?.fullName || user?.name || user?.email?.split('@')[0] || "User";
+  const displayEmail = userEmail || user?.email || "user@example.com";
+  const avatarUrl = userAvatar || user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`;
+
+  // Generate initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("").toUpperCase();
+  };
   const navigate = useNavigate();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("overview");
@@ -159,10 +174,22 @@ const Sidebar = ({
       path: "/admin/analytics",
     },
     {
-      id: "users",
-      label: "User Management",
+      id: "user-management",
+      label: "User & Role Management",
       icon: <Users size={20} />,
-      path: "/admin/users",
+      path: "/admin/user-management",
+      submenu: [
+        {
+          id: "users",
+          label: "Users",
+          path: "/admin/user-management",
+        },
+        {
+          id: "roles",
+          label: "Roles & Permissions",
+          path: "/admin/user-management/roles",
+        },
+      ],
     },
   ];
 
@@ -253,15 +280,15 @@ const Sidebar = ({
         )}
       >
         <Avatar className="h-10 w-10">
-          <AvatarImage src={userAvatar} alt={userName} />
+          <AvatarImage src={avatarUrl} alt={displayName} />
           <AvatarFallback className="bg-blue-600">
-            {userName.substring(0, 2).toUpperCase()}
+            {getInitials(displayName)}
           </AvatarFallback>
         </Avatar>
         {!collapsed && (
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{userName}</p>
-            <p className="text-xs text-slate-400 truncate">{userEmail}</p>
+            <p className="text-sm font-medium truncate">{displayName}</p>
+            <p className="text-xs text-slate-400 truncate">{displayEmail}</p>
           </div>
         )}
       </div>
@@ -323,12 +350,18 @@ const Sidebar = ({
                             className={cn(
                               "block w-full text-left py-2 px-3 text-sm rounded-md sidebar-item-theme hover:text-white hover:bg-slate-800",
                               activeItem === `${item.id}-${subItem.id}` &&
-                                "sidebar-item-active-theme",
+                              "sidebar-item-active-theme",
                             )}
                             onClick={() => {
                               setActiveItem(`${item.id}-${subItem.id}`);
+                              // Always use direct navigation for user management
+                              if (item.id === 'user-management') {
+                                console.log('Navigating to:', subItem.path);
+                                navigate(subItem.path);
+                                return;
+                              }
                               // Check if this is a tab within the dashboard
-                              if (subItem.path.includes('/admin/dashboard')) {
+                              else if (subItem.path.includes('/admin/dashboard')) {
                                 // Direct tab change without navigation
                                 onTabChange(item.id, subItem.id);
                               } else if (subItem.path.includes('/admin/')) {
@@ -359,8 +392,14 @@ const Sidebar = ({
                   )}
                   onClick={() => {
                     setActiveItem(item.id);
+                    // Always use direct navigation for user management
+                    if (item.id === 'user-management') {
+                      console.log('Navigating to main item:', item.path);
+                      navigate(item.path);
+                      return;
+                    }
                     // Check if this is a tab within the dashboard
-                    if (item.path === '/admin/dashboard') {
+                    else if (item.path === '/admin/dashboard') {
                       // Direct tab change without navigation
                       onTabChange(item.id);
                     } else if (item.path.includes('/admin/')) {

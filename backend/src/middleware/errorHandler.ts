@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ApiError, formatError, InternalServerError } from '../utils/errors.js';
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import env from '../config/env.js';
@@ -8,7 +8,21 @@ import logger from '../utils/logger.js';
  * Global error handling middleware
  * Catches all errors and formats them consistently
  */
-export function errorHandler(err: Error, req: Request, res: Response): void {
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): void {
+  // If headers already sent, delegate to Express default error handler
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  // Log complete error details for debugging
+  console.error('ERROR DETAILS:', {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    path: `${req.method} ${req.path}`,
+    body: req.body
+  });
+
   // Log error with details
   logger.error(`${err.name}: ${err.message}`, {
     stack: env.nodeEnv !== 'production' ? err.stack : undefined,
@@ -88,7 +102,9 @@ export function errorHandler(err: Error, req: Request, res: Response): void {
 
   // Handle truly unknown errors
   const serverError = new InternalServerError(
-    env.nodeEnv === 'production' ? 'Internal server error' : 'Unknown error'
+    env.nodeEnv === 'production'
+      ? 'Internal server error'
+      : 'Unknown server error - check server logs for details'
   );
 
   res.status(500).json(formatError(serverError));

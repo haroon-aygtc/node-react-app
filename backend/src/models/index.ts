@@ -1,11 +1,11 @@
 /**
  * Model type definitions
- * 
+ *
  * This file re-exports Prisma's generated types with any necessary extensions
  * or customizations. In most cases, we can use Prisma's types directly.
  */
 
-import { 
+import {
   User as PrismaUser,
   UserActivity as PrismaUserActivity,
   FollowUpConfig as PrismaFollowUpConfig,
@@ -24,11 +24,17 @@ import {
   ScrapingSelector as PrismaScrapingSelector,
   ScrapingData as PrismaScrapingData,
   AnalyticsLog as PrismaAnalyticsLog,
-  MonitoringLog as PrismaMonitoringLog
+  MonitoringLog as PrismaMonitoringLog,
+  UserRole as PrismaUserRole,
+  RolePermission as PrismaRolePermission,
+  Role as PrismaRole,
+  Permission as PrismaPermission,
 } from '@prisma/client';
 
 // Re-export Prisma types directly
-export type User = PrismaUser;
+export interface User extends Omit<PrismaUser, 'userRoles'> {
+  userRoles: UserRole[];
+}
 export type UserActivity = PrismaUserActivity;
 export type FollowUpConfig = PrismaFollowUpConfig;
 export type PredefinedQuestionSet = PrismaPredefinedQuestionSet;
@@ -51,12 +57,55 @@ export type MonitoringLog = PrismaMonitoringLog;
 // Add any custom types that don't directly map to Prisma models
 export type AIModelConfig = ApiKey; // AIModelConfig is actually stored in the ApiKey table
 
-// Add Guest type which seems to be referenced but not in the Prisma schema
 export interface Guest {
-  id: string;
+  id: number;
   fullName: string;
   email: string;
   phone?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Define Role type based on schema.prisma
+export interface Role {
+  id: number;
+  name: string;
+  description?: string | null;
+  isDefault: boolean;
+  isSystem: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  rolePermissions?: RolePermission[];
+}
+
+// Define UserRole type based on schema.prisma
+export interface UserRole {
+  userId: number;
+  roleId: number;
+  assignedAt: Date;
+  assignedBy: number | null;
+  createdAt: Date;
+  role?: Role;
+}
+
+// Define Permission type based on schema.prisma
+export interface Permission {
+  id: number;
+  name: string;
+  description?: string | null;
+  category: string;
+  action: string;
+  createdAt: Date;
+  updatedAt: Date;
+  rolePermissions?: RolePermission[];
+}
+
+export interface RolePermission {
+  roleId: number;
+  permissionId: number;
+  assignedAt: Date;
+  assignedBy: number | null;
+  createdAt: Date;
+  role?: Role;
+  permission?: Permission;
 }

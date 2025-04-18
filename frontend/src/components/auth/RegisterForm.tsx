@@ -25,7 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, Lock, User, Mail, CheckCircle, Loader2 } from "lucide-react";
+import { MessageSquare, User, Mail, CheckCircle, Loader2 } from "lucide-react";
+import PasswordInput from "./PasswordInput";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -40,7 +41,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const RegisterForm = () => {
-  const { register, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, clearError, error } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<FormValues>({
@@ -72,17 +73,26 @@ const RegisterForm = () => {
           title: "Registration successful!",
           description: "Welcome to ChatEmbed. Redirecting to dashboard...",
           variant: "default",
+          className: "bg-green-500 border-green-600 text-white",
         });
 
         setTimeout(() => {
           navigate("/admin/dashboard", { replace: true });
         }, 1500);
+      } else {
+        // Show the specific error from the auth context
+        const errorMessage = error || "Registration failed, please try again";
+        toast({
+          title: "Registration failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Registration error:", error);
       toast({
         title: "Registration failed",
-        description: error instanceof Error ? error.message : "Please try again later",
+        description: error instanceof Error ? error.message : "Authentication failed",
         variant: "destructive",
       });
     } finally {
@@ -143,7 +153,7 @@ const RegisterForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-             
+
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -199,19 +209,7 @@ const RegisterForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <div className="relative">
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="••••••••"
-                              {...field}
-                              className="pl-10 input-theme"
-                            />
-                          </FormControl>
-                          <div className="absolute left-3 top-3 text-muted-color">
-                            <Lock size={16} />
-                          </div>
-                        </div>
+                        <PasswordInput {...field} />
                         <FormDescription className="text-xs">
                           Must be at least 8 characters
                         </FormDescription>
@@ -226,19 +224,7 @@ const RegisterForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Confirm Password</FormLabel>
-                        <div className="relative">
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="••••••••"
-                              {...field}
-                              className="pl-10 input-theme"
-                            />
-                          </FormControl>
-                          <div className="absolute left-3 top-3 text-muted-color">
-                            <Lock size={16} />
-                          </div>
-                        </div>
+                        <PasswordInput {...field} />
                         <FormMessage />
                       </FormItem>
                     )}

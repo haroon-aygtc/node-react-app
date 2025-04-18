@@ -19,7 +19,7 @@ export default defineConfig({
   server: {
     // @ts-ignore
     allowedHosts: true,
-    port: 5177, // Explicitly set port to match your frontend URL
+    port: 5179, // Explicitly set port to match your frontend URL
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

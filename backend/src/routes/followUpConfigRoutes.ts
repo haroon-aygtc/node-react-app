@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'; // eslint-disable-line no-unused-vars
 import {
   getAllFollowUpConfigs,
   getFollowUpConfigById,
@@ -11,16 +11,16 @@ import {
   createTopicBasedQuestionSet,
   updateTopicBasedQuestionSet,
   deleteTopicBasedQuestionSet,
-} from '../controllers/followUpConfigController';
+} from '../controllers/followUpConfigController.js';
 
 const router = express.Router();
 
 // FollowUpConfig CRUD
-router.get('/', getAllFollowUpConfigs);
-router.get('/:id', getFollowUpConfigById);
-router.post('/', createFollowUpConfig);
-router.put('/:id', updateFollowUpConfig);
-router.delete('/:id', deleteFollowUpConfig);
+router.get('/', getAllFollowUpConfigs as any);
+router.get('/:id', getFollowUpConfigById as any);
+router.post('/', createFollowUpConfig as any);
+router.put('/:id', updateFollowUpConfig as any);
+router.delete('/:id', deleteFollowUpConfig as any);
 
 // PredefinedQuestionSet nested CRUD
 router.post('/:configId/predefined-question-sets', createPredefinedQuestionSet);

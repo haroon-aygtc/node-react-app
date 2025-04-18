@@ -26,12 +26,23 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({
   title = "Admin Dashboard",
-  username = "Admin User",
+  username,
   userAvatar = "",
-  notificationCount = 3,
+  notificationCount = 0,
 }: DashboardHeaderProps) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Use the authenticated user's data if no username is provided
+  const displayName = username || user?.fullName || user?.name || user?.email?.split('@')[0] || "User";
+
+  // Generate avatar fallback from user's name
+  const generateInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("");
+  };
 
   return (
     <header className="bg-card border-b border-color p-4 flex items-center justify-between w-full h-20 shadow-sm">
@@ -111,16 +122,13 @@ const DashboardHeader = ({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={userAvatar} alt={username} />
+                <AvatarImage src={userAvatar} alt={displayName} />
                 <AvatarFallback className="bg-primary/10 text-primary">
-                  {username
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                  {generateInitials(displayName)}
                 </AvatarFallback>
               </Avatar>
               <span className="font-medium text-sm hidden md:inline-block">
-                {username}
+                {displayName}
               </span>
             </Button>
           </DropdownMenuTrigger>

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as guestService from '../services/guestService';
+import * as guestService from '../services/guestService.js';
 
 export async function registerGuest(req: Request, res: Response) {
   try {

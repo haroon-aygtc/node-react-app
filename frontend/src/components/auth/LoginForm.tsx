@@ -23,7 +23,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, Lock, User, ShieldCheck, Loader2, Mail } from "lucide-react";
+import { MessageSquare, User, ShieldCheck, Loader2, Mail } from "lucide-react";
+import PasswordInput from "./PasswordInput";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -33,7 +34,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const LoginForm = () => {
-  const { login, isLoading, clearError } = useAuth();
+  const { login, isLoading, clearError, error } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -56,6 +57,7 @@ const LoginForm = () => {
           title: "Login successful!",
           description: "Welcome back to ChatEmbed. Redirecting to dashboard...",
           variant: "default",
+          className: "bg-green-500 border-green-600 text-white",
         });
         const user = JSON.parse(localStorage.getItem("user") || '{}');
         const isAdmin = user?.role?.toLowerCase() === 'admin';
@@ -68,9 +70,10 @@ const LoginForm = () => {
           }
         }, 1500);
       } else {
+        const errorMessage = error || "Invalid credentials";
         toast({
           title: "Login failed",
-          description: "Please try again later.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
@@ -78,7 +81,7 @@ const LoginForm = () => {
       console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        description: error instanceof Error ? error.message : "Authentication failed",
         variant: "destructive",
       });
     }
@@ -112,7 +115,7 @@ const LoginForm = () => {
               </div>
               <div className="flex items-center">
                 <div className="mr-2 rounded-full bg-white/20 p-1">
-                  <Lock className="h-4 w-4" />
+                  <ShieldCheck className="h-4 w-4" />
                 </div>
                 <span>Secure admin access</span>
               </div>
@@ -174,23 +177,13 @@ const LoginForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <div className="relative">
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="••••••••"
-                              className="pl-10 input-theme"
-                              {...field}
-                              onChange={(e) => {
-                                clearError();
-                                field.onChange(e);
-                              }}
-                            />
-                          </FormControl>
-                          <div className="absolute left-3 top-3 text-muted-color">
-                            <Lock size={16} />
-                          </div>
-                        </div>
+                        <PasswordInput
+                          {...field}
+                          onChange={(e) => {
+                            clearError();
+                            field.onChange(e);
+                          }}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}

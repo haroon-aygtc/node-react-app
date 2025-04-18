@@ -1,18 +1,18 @@
-import express from 'express';
+import express from 'express'; // eslint-disable-line no-unused-vars
 import {
   getAllModerationRules,
   getModerationRuleById,
   createModerationRule,
   updateModerationRule,
   deleteModerationRule,
-} from '../controllers/moderationRuleController';
+} from '../controllers/moderationRuleController.js';
 
 const router = express.Router();
 
-router.get('/', getAllModerationRules);
-router.get('/:id', getModerationRuleById);
-router.post('/', createModerationRule);
-router.put('/:id', updateModerationRule);
-router.delete('/:id', deleteModerationRule);
+router.get('/', getAllModerationRules as any);
+router.get('/:id', getModerationRuleById as any);
+router.post('/', createModerationRule as any);
+router.put('/:id', updateModerationRule as any);
+router.delete('/:id', deleteModerationRule as any);
 
 export default router;
